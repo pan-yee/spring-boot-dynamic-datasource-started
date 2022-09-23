@@ -62,7 +62,8 @@ public class DynamicDataSourceAspect {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         //获取当前切点方法对象
         Method method = methodSignature.getMethod();
-        if (method.getDeclaringClass().isInterface()) {//判断是否为借口方法
+        if (method.getDeclaringClass().isInterface()) {
+            //判断是否为借口方法
             try {
                 //获取实际类型的方法对象
                 method = joinPoint.getTarget().getClass()
