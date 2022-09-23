@@ -1,7 +1,6 @@
 package com.apedad.example.configuration;
 
 import com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceBuilder;
-import com.apedad.example.commons.DataSourceKey;
 import com.apedad.example.commons.DynamicRoutingDataSource;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
@@ -27,25 +26,13 @@ import java.util.Map;
 public class DynamicDataSourceConfiguration {
     @Bean
     @ConfigurationProperties(prefix = "multiple.datasource.master")
-    public DataSource dbMaster() {
+    public DataSource master() {
         return DruidDataSourceBuilder.create().build();
     }
 
     @Bean
-    @ConfigurationProperties(prefix = "multiple.datasource.slave1")
-    public DataSource dbSlave1() {
-        return DruidDataSourceBuilder.create().build();
-    }
-
-    @Bean
-    @ConfigurationProperties(prefix = "multiple.datasource.slave2")
-    public DataSource dbSlave2() {
-        return DruidDataSourceBuilder.create().build();
-    }
-
-    @Bean
-    @ConfigurationProperties(prefix = "multiple.datasource.other")
-    public DataSource dbOther() {
+    @ConfigurationProperties(prefix = "multiple.datasource.slave")
+    public DataSource slave() {
         return DruidDataSourceBuilder.create().build();
     }
 
@@ -57,12 +44,10 @@ public class DynamicDataSourceConfiguration {
     @Bean
     public DataSource dynamicDataSource() {
         DynamicRoutingDataSource dataSource = new DynamicRoutingDataSource();
-        dataSource.setDefaultTargetDataSource(dbMaster());
+        dataSource.setDefaultTargetDataSource(master());
         Map<Object, Object> dataSourceMap = new HashMap<>(4);
-        dataSourceMap.put(DataSourceKey.DB_MASTER, dbMaster());
-        dataSourceMap.put(DataSourceKey.DB_SLAVE1, dbSlave1());
-        dataSourceMap.put(DataSourceKey.DB_SLAVE2, dbSlave2());
-        dataSourceMap.put(DataSourceKey.DB_OTHER, dbOther());
+        dataSourceMap.put("master", master());
+        dataSourceMap.put("slave", slave());
         dataSource.setTargetDataSources(dataSourceMap);
         return dataSource;
     }

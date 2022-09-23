@@ -26,6 +26,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<User> listAllForKey(String dsKey) {
+        return userMapper.listAll();
+    }
+
+    @Override
     public int insert(User user) {
         return userMapper.insert(user);
     }

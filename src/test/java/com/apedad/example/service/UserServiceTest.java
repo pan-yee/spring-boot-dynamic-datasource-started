@@ -28,9 +28,13 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testRandom() {
-        for (int i = 0; i < 100; i++) {
-            LOG.info(RandomUtils.nextInt(0, 2));
-        }
+    public void listAllForKeyMaster() {
+        LOG.info("user表数据：" + JSON.toJSONString(userService.listAllForKey("master")));
     }
+
+    @Test
+    public void listAllForKeySlave() {
+        LOG.info("user表数据：" + JSON.toJSONString(userService.listAllForKey("slave")));
+    }
+
 }

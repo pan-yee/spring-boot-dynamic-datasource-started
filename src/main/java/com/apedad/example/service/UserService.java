@@ -11,5 +11,7 @@ import java.util.List;
 public interface UserService {
     List<User> listAll();
 
+    List<User> listAllForKey(String dsKey);
+
     int insert(User user);
 }

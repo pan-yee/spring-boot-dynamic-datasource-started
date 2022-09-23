@@ -1,8 +1,10 @@
 package com.apedad.example.commons;
 
 import com.apedad.example.annotation.TargetDataSource;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.log4j.Logger;
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -12,6 +14,9 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.util.Arrays;
+import java.util.stream.Stream;
 
 /**
  * @author RocLiu [apedad@qq.com]
@@ -35,14 +40,9 @@ public class DynamicDataSourceAspect {
      */
     @Before("@annotation(targetDataSource)")
     public void doBefore(JoinPoint joinPoint, TargetDataSource targetDataSource) {
-        DataSourceKey dataSourceKey = targetDataSource.dataSourceKey();
-        if (dataSourceKey == DataSourceKey.DB_OTHER) {
-            LOG.info(String.format("设置数据源为  %s", DataSourceKey.DB_OTHER));
-            DynamicDataSourceContextHolder.set(DataSourceKey.DB_OTHER);
-        } else {
-            LOG.info(String.format("使用默认数据源  %s", DataSourceKey.DB_MASTER));
-            DynamicDataSourceContextHolder.set(DataSourceKey.DB_MASTER);
-        }
+        String dataSourceKey = targetDataSource.dataSourceKey();
+        LOG.info(String.format("设置数据源为  %s", dataSourceKey));
+        DynamicDataSourceContextHolder.set("dataSourceKey");
     }
 
     /**
@@ -62,18 +62,18 @@ public class DynamicDataSourceAspect {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         //获取当前切点方法对象
         Method method = methodSignature.getMethod();
-        if (method.getDeclaringClass().isInterface()) {
-            //判断是否为借口方法
-            try {
-                //获取实际类型的方法对象
-                method = joinPoint.getTarget().getClass()
-                        .getDeclaredMethod(joinPoint.getSignature().getName(), method.getParameterTypes());
-            } catch (NoSuchMethodException e) {
-                LOG.error("方法不存在！", e);
-            }
-        }
         if (null == method.getAnnotation(TargetDataSource.class)) {
-            DynamicDataSourceContextHolder.setSlave();
+            Object[] args = joinPoint.getArgs();
+            //2.最关键的一步:通过这获取到方法的所有参数名称的字符串数组
+            String[] parameterNames = methodSignature.getParameterNames();
+            //3.通过你需要获取的参数名称的下标获取到对应的值
+            int dsKeyIndex = ArrayUtils.indexOf(parameterNames, "dsKey");
+            if (dsKeyIndex != -1) {
+                String dsKey = (String) args[dsKeyIndex];
+                DynamicDataSourceContextHolder.set(dsKey);
+            }else{
+                DynamicDataSourceContextHolder.set("master");
+            }
         }
     }
 }

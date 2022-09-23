@@ -1,6 +1,5 @@
 package com.apedad.example.commons;
 
-import org.apache.commons.lang3.RandomUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -10,7 +9,7 @@ import org.apache.log4j.Logger;
 public class DynamicDataSourceContextHolder {
     private static final Logger LOG = Logger.getLogger(DynamicDataSourceContextHolder.class);
 
-    private static final ThreadLocal<DataSourceKey> currentDatesource = new ThreadLocal<>();
+    private static final ThreadLocal<String> currentDatesource = new ThreadLocal<>();
 
     /**
      * 清除当前数据源
@@ -24,7 +23,7 @@ public class DynamicDataSourceContextHolder {
      *
      * @return 当前使用数据源的ID
      */
-    public static DataSourceKey get() {
+    public static String get() {
         return currentDatesource.get();
     }
 
@@ -33,18 +32,7 @@ public class DynamicDataSourceContextHolder {
      *
      * @param value 需要设置的数据源ID
      */
-    public static void set(DataSourceKey value) {
+    public static void set(String value) {
         currentDatesource.set(value);
-    }
-
-    /**
-     * 设置从从库读取数据
-     */
-    public static void setSlave() {
-        if (RandomUtils.nextInt(0, 2) > 0) {
-            DynamicDataSourceContextHolder.set(DataSourceKey.DB_SLAVE2);
-        } else {
-            DynamicDataSourceContextHolder.set(DataSourceKey.DB_SLAVE1);
-        }
     }
 }
